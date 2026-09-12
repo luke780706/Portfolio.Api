@@ -1,34 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Portfolio.Api.Models;
 
 namespace Portfolio.Api.Services
 {
     public class PortfolioService : IPortfolioService
     {
-        public async Task<ActionResult> GetProfileAsync()
+        public async Task<ProfileModel> GetProfileAsync()
+        {
+            
+        }
+
+        public async Task<List<ProjectModel>> GetProjectsAsync()
         {
 
         }
 
-        [HttpGet("projects")]
-        public async Task<ActionResult> GetProjects()
+        public async Task<ExperienceModel> GetExperienceAsync()
         {
 
         }
 
-        [HttpGet("experience")]
-        public async Task<ActionResult> GetExperience()
+        public async Task<List<SkillModel>> GetSkillsAsync()
         {
 
         }
 
-        [HttpGet("skills")]
-        public async Task<ActionResult> GetSkills()
-        {
-
-        }
-
-        [HttpGet("contact")]
-        public async Task<ActionResult> GetContact()
+        public async Task<ContactModel> GetContactAsync()
         {
 
         }
