@@ -18,7 +18,12 @@ namespace Portfolio.Api.Controllers
         [HttpGet("profile")]
         public async Task<ActionResult<ProfileDto>> GetProfile()
         {
-            ProfileModel profile = await _portfolioService.GetProfileAsync();
+            ProfileModel? profile = await _portfolioService.GetProfileAsync();
+
+            if (profile == null)
+            {
+                return NotFound();
+            }
 
             ProfileDto result = new()
             {
@@ -46,7 +51,7 @@ namespace Portfolio.Api.Controllers
         [HttpGet("experience")]
         public async Task<ActionResult<List<ExperienceDto>>> GetExperience()
         {
-            var experiences = await _portfolioService.GetExperienceAsync();
+            var experiences = await _portfolioService.GetExperiencesAsync();
 
             List<ExperienceDto> result = [.. experiences.Select(x=> new ExperienceDto()
             {
@@ -75,7 +80,12 @@ namespace Portfolio.Api.Controllers
         [HttpGet("contact")]
         public async Task<ActionResult<ContactDto>> GetContact()
         {
-            ContactModel contactData = await _portfolioService.GetContactAsync();
+            ContactModel? contactData = await _portfolioService.GetContactAsync();
+
+            if (contactData == null)
+            {
+                return NotFound();
+            }
 
             ContactDto result = new()
             {
