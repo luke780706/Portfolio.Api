@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Portfolio.Api.Data;
+using Portfolio.Api.DTOs;
 using Portfolio.Api.Entities;
 using Portfolio.Api.Models;
 
@@ -38,8 +39,10 @@ namespace Portfolio.Api.Services
                 .Select(x =>
                  new ProjectModel()
                  {
+                     Id = x.Id,
                      ProjectDesc = x.ProjectDesc,
-                     ProjectName = x.ProjectName
+                     ProjectName = x.ProjectName,
+                     GitHubUrl = x.GitHubUrl
                  }).ToListAsync();
         }
 
@@ -85,6 +88,60 @@ namespace Portfolio.Api.Services
             };
 
             return contactModells;
+        }
+
+        public async Task<Project> AddProjectAsync(ProjectModel projectModel)
+        {
+            Project newProject = new()
+            {
+                ProjectName = projectModel.ProjectName,
+                ProjectDesc = projectModel.ProjectDesc,
+                GitHubUrl = projectModel.GitHubUrl
+            };
+
+            _appDbContext.Projects.Add(newProject);
+
+            await _appDbContext.SaveChangesAsync();
+
+            return newProject;
+        }
+
+        public async Task<Project?> GetProjectByIdAsync(int id)
+        {
+            return await _appDbContext.Projects
+                .FirstOrDefaultAsync(x => x.Id == id);
+        }
+        public async Task<ProjectModel?> UpdateProjectAsync(int id, ProjectModel projectModel)
+        {
+            Project? result = await _appDbContext.Projects.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (result == null)
+            {
+                _logger.LogWarning("Project could not be found");
+                return null;
+            }
+
+            result.ProjectName = projectModel.ProjectName;
+            result.ProjectDesc = projectModel.ProjectDesc;
+            result.GitHubUrl = projectModel.GitHubUrl;
+
+            await _appDbContext.SaveChangesAsync();
+
+            return new ProjectModel()
+            {
+                Id = result.Id,
+                ProjectName = result.ProjectName,
+                ProjectDesc = result.ProjectDesc,
+                GitHubUrl = result.GitHubUrl
+            };
+        }
+        public async Task<bool> DeleteProjectAsync(int id)
+        {
+            var deleted = await _appDbContext.Projects
+                .Where(x => x.Id == id)
+                .ExecuteDeleteAsync();
+
+            return deleted > 0;
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Portfolio.Api.DTOs;
+using Portfolio.Api.Entities;
 using Portfolio.Api.Models;
 using Portfolio.Api.Services;
+using Portfolio.Api.Mappings;
 
 namespace Portfolio.Api.Controllers
 {
@@ -40,9 +42,10 @@ namespace Portfolio.Api.Controllers
 
             List<ProjectDto> result = [.. projects
                 .Select(x => new ProjectDto()
-                {
+                {   Id = x.Id,
                     ProjectDesc = x.ProjectDesc,
-                    ProjectName = x.ProjectName
+                    ProjectName = x.ProjectName,
+                    GitHubUrl = x.GitHubUrl
                 })];
 
             return Ok(result);
@@ -96,6 +99,77 @@ namespace Portfolio.Api.Controllers
             };
 
             return Ok(result);
+        }
+        [HttpPost("projects")]
+        public async Task<ActionResult<ProjectDto>> AddProject(CreateProjectDto createProjectDto)
+        {
+            ProjectModel newProjectModel = new()
+            {
+                ProjectName = createProjectDto.ProjectName,
+                ProjectDesc = createProjectDto.ProjectDesc,
+                GitHubUrl = createProjectDto.GitHubUrl
+            };
+
+            Project result = await _portfolioService.AddProjectAsync(newProjectModel);
+
+            ProjectDto projectDto = new()
+            {
+                Id = result.Id,
+                ProjectName = result.ProjectName,
+                ProjectDesc = result.ProjectDesc,
+                GitHubUrl = result.GitHubUrl
+            };
+
+            return CreatedAtAction(nameof(GetProjectById), new { projectDto.Id }, projectDto);
+        }
+
+        [HttpGet("project/{id}")]
+        public async Task<ActionResult<ProjectDto>> GetProjectById(int id)
+        {
+            var result = await _portfolioService.GetProjectByIdAsync(id);
+
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            ProjectDto project = new()
+            {
+                Id = result.Id,
+                ProjectName = result.ProjectName,
+                ProjectDesc = result.ProjectDesc,
+                GitHubUrl = result.GitHubUrl
+            };
+
+            return Ok(project);
+
+        }
+        [HttpPut("updateproject/{id}")]
+        public async Task<ActionResult<ProjectDto>> UpdateProject(int id, UpdateProjectDto updateProjectDto)
+        {
+            var projectModel = ProjectMapper.ToModel(updateProjectDto);
+
+            var result = await _portfolioService.UpdateProjectAsync(id, projectModel);
+
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            ProjectDto projectDto = ProjectMapper.ToDto(result);
+
+            return Ok(projectDto);
+        }
+        [HttpDelete("deleteproject/{id}")]
+        public async Task<ActionResult> DeleteProject(int id)
+        {
+            var result = await _portfolioService.DeleteProjectAsync(id);
+
+            if (!result)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
     }
 }
